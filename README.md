@@ -256,3 +256,28 @@ analysis, directory co-occurrence, git history, or something else entirely.
 
 This is an open research question. Everything in its time.*This is a research project in its earliest stage. All claims are theoretical
 until benchmarked. All design decisions are open to revision.*
+
+
+
+
+---
+
+## ⚠️ A Note on Expectations
+
+**This is a theoretical design document.**
+
+I'm currently exploring the idea to see if it holds water.
+No code exists yet. No benchmarks. No proofs.
+
+If you're here looking for something production-ready,
+you should probably move on for now. This is, admittedly,
+overly ambitious for a first systems project.
+
+But if you're the kind of person who enjoys working on hard
+problems purely for the love of it — someone ambitious to the
+point of stupidity — then I'd be grateful for parallel work,
+contributions, or just a good technical argument.
+
+Either way, thanks for reading.
+
+---
