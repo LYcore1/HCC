@@ -1,141 +1,133 @@
 # HCC - High Capacity Colorful
 
-**A biology-inspired storage optimization layer.**
-
-*Inspired by the Golgi apparatus, built for the future of computing.*
+**A semantic deduplication and adaptive compression layer for Linux storage.**
 
 ---
 
-## The Idea
+## Problem
 
-Modern computers store data like clothes thrown on the floor. Linear addresses. No structure. No meaning. A string used by ten different programs gets stored ten times. Files that belong together are scattered across the disk.
+Current filesystems treat data as flat, untyped byte streams. Two files that
+belong to the same logical context (e.g., a payment module) are stored
+independently. Identical blocks across related files are stored multiple times.
+Compression is applied uniformly regardless of data type.
 
-HCC stores data like a wardrobe with colored hangers.
-
-Inspired by the **Golgi apparatus** — the cellular organelle that tags, sorts, and routes proteins without moving them — HCC adds a semantic color layer between the OS and storage. Data stays in place. A small color table maps what belongs together.
+This leaves capacity on the table.
 
 ---
 
-## How It Works
-### The Golgi Method
+## Approach
 
-```
-┌─────────────────────────────────────────────┐
-│              Applications                    │
-│         (don't know HCC exists)              │
-├─────────────────────────────────────────────┤
-│              HCC Layer                       │
-│                                              │
-│  ┌──────────┐ ┌──────────┐ ┌─────────────┐  │
-│  │ Watcher  │ │ Learner  │ │ Color Table  │  │
-│  │          │ │          │ │ (in memory)  │  │
-│  └──────────┘ └──────────┘ └─────────────┘  │
-│                                              │
-│  🔴 Payment   🟡 Auth   🔵 UI   🟢 Images   │
-├─────────────────────────────────────────────┤
-│           Real Hardware                      │
-│           (SSD / HDD)                        │
-└─────────────────────────────────────────────┘
-```
+HCC groups files into **colored branches** based on semantic similarity rather
+than file extension or directory location. A branch is a set of files that
+tend to appear together, change together, or share structural patterns.
 
-### Colors, Not Extensions
+Once grouped, HCC applies:
 
-A `.py` file and a `.js` file can share the same color if they belong together:
+- **Intra-branch deduplication** — identical blocks within a branch are stored once
+- **Adaptive compression** — each branch gets the best algorithm for its data type
+- **Colored prefetch** — accessing one file in a branch preloads related files
 
+---
 
-🔴 Payment Branch:
+### Example
+Payment Branch (🔴):
 ├── payment.py
 ├── checkout.js
 ├── invoice.html
 └── logo.png
 
-🟡 Authentication Branch:
+Auth Branch (🟡):
 ├── auth.py
 ├── login.js
 ├── users.sql
 └── avatar.png
 
 
-
-Same extension ≠ same color. Same color = semantic connection.
-
-### No Data Movement
-
-HCC does not move data. It tags it. Like the Golgi apparatus tags proteins. A pointer table maps colors to file locations. Search becomes a color lookup — not a full disk scan.
-
-### Automatic Deduplication
-
-Files in the same branch share patterns. Identical blocks are stored once, referenced many times. A 100 GB project folder with redundant files can become 20 GB. Without losing a single byte.
+A `.png` and a `.py` share a color not because of their extension,
+but because they serve the same context.
 
 ---
 
-## Why It Matters
+### Inspiration
 
-| Without HCC | With HCC |
+The tagging behavior is loosely inspired by the Golgi apparatus — a cellular
+organelle that labels proteins for routing without modifying their structure.
+HCC tags files without moving them. The color table is a lightweight index
+kept in memory.
+
+---
+
+## Expected Gains
+
+Gains are workload-dependent. On projects with high internal redundancy
+(multiple similar codebases, container images, build artifacts), effective
+capacity can increase by 2-5x through deduplication alone. Compression adds
+a further 1.5-3x depending on data type.
+
+No magic. Just structural redundancy exploitation with better grouping.
+
+---
+
+## Technical Challenges (Open Questions)
+
+1. **Semantic grouping is hard.** How do we determine that `payment.py` and
+   `checkout.js` belong together without reading and understanding both files?
+   Initial approach: structural fingerprinting (imports, includes, directory
+   co-occurrence) rather than full content analysis.
+
+2. **Grouping overhead must be sub-linear.** If grouping costs more than the
+   savings it produces, it's useless. Target: O(n) classification with
+   constant factors small enough to run at write time.
+
+3. **False positives in dedup are catastrophic.** A hash collision in the
+   dedup table means data loss. This is a solved problem in ZFS and Btrfs.
+   HCC must match their safety guarantees.
+
+4. **Cold start.** A new file has no history. The system needs a reasonable
+   default before learning patterns.
+
+---
+
+## Design Decisions
+
+| Choice | Rationale |
 |---|---|
-| 512 GB SSD stores 512 GB | 512 GB SSD stores 2-5 TB effective(IDK) |
-| Files scattered across disk | Files clustered by meaning |
-| Identical data stored multiple times | Deduplication by color, automatically |
-| No prefetch intelligence | Same-color files loaded together |
-| Search scans directories | Search jumps to the right branch |
-
----
-
-## Technical Foundation
-
-- **Language:** Zig (chosen for comptime, no hidden allocations, direct pointer control, built-in C compiler)
-- **Target:** Linux filesystem layer (FUSE or kernel module)
-- **Color Table:** Lightweight, stays in memory
-- **Overhead:** Near zero. Tags assigned once at write time. Reads are pointer lookups.
-- **Compression:** Adaptive per branch — different algorithms for text, images, code, and binaries
+| **Zig** | Comptime evaluation, no hidden allocations, direct pointer control, built-in C interop |
+| **FUSE first, kernel module later** | Faster iteration, safer crashes during development |
+| **Color table in memory, not on disk** | Lookup latency matters. Table is small (~6-10 MB for typical systems) |
+| **Per-branch compression strategy** | Text branches get zstd, image branches get no re-compression, binary branches get lz4 |
 
 ---
 
 ## Status
 
-**Phase 0 — Learning**
-
-I'm 19. I don't know Zig yet. I'm learning. This repository is a promise: the idea is public, the work starts after my university entrance exam.
-
-No code exists yet. Just the idea, the name, and the path forward.
+**Pre-alpha. No code yet.** Learning Zig and systems programming.
+Work begins in earnest after university entrance exams.
 
 ---
 
 ## Roadmap
 
-### Phase 1: HCC-Storage (First)
-- Learn Zig and systems programming
-- Build the color classifier
-- Implement FUSE-based colored filesystem
-- Adaptive compression per branch
-- Automatic deduplication within branches
-- Release v0.1
-
-### Phase 2: HCC-Memory
-- Apply the same color logic to RAM
-- Compete with zram
-- Color-aware memory compression and dedup
-
-### Phase 3: HCC-CPU
-- Color-aware process scheduling
-- P-core/E-core intelligent routing
-
-### Phase 4: HCC-Full
-- All layers working together
-- A complete optimization layer between OS and hardware
-- Release v1.0
+1. **HCC-Storage** — colored FUSE filesystem with dedup and adaptive compression
+2. **HCC-Memory** — same logic applied to RAM pages (zram competitor)
+3. **HCC-CPU** — color-aware task scheduling
+4. **HCC-Full** — integrated optimization layer
 
 ---
 
 ## Name
 
-**HCC** — High Capacity Colorful.
-
-Yes, it shares an acronym with a type of cancer. If this project succeeds, it will outrank it on Google. If it fails, at least the name was memorable.
+HCC = High Capacity Colorful. Yes, the acronym collides with a medical term.
+If the project succeeds, search engines will adapt.
 
 ---
 
-*Because the Golgi apparatus took 127 years to be discovered. HCC won't take that long.*
+*Questions, criticism, and contributions welcome. This is a research project
+in its earliest stage.*
+
+
+
+
 
 
 
