@@ -72,29 +72,26 @@ A `.py` file and a `.js` file can share the same color (e.g., `🔴 Payment`),
 but because they are in different type groups, there is no collision.
 
 
-
+```
 Root
 ├── 📁 Python
-│ ├── 🔴 Payment (payment.py, payment_utils.py)
-│ ├── 🟡 Auth (auth.py, auth_middleware.py)
-│ └── 🔵 UI (ui_renderer.py, ui_components.py)
+│   ├── 🔴 Payment (payment.py, payment_utils.py)
+│   ├── 🟡 Auth (auth.py, auth_middleware.py)
+│   └── 🔵 UI (ui_renderer.py, ui_components.py)
 │
 ├── 📁 JavaScript
-│ ├── 🔴 Payment (checkout.js, billing.js)
-│ ├── 🟡 Auth (login.js, session.js)
-│ └── 🔵 UI (modal.js, dropdown.js)
+│   ├── 🔴 Payment (checkout.js, billing.js)
+│   ├── 🟡 Auth (login.js, session.js)
+│   └── 🔵 UI (modal.js, dropdown.js)
 │
 ├── 📁 Images
-│ ├── 🔴 Payment (logo.png, credit_card_icons/)
-│ └── 🟡 Auth (avatar.png, profile_photos/)
+│   ├── 🔴 Payment (logo.png, credit_card_icons/)
+│   └── 🟡 Auth (avatar.png, profile_photos/)
 │
 └── 📁 SQL
-├── 🔴 Payment (transactions.sql, invoices.sql)
-└── 🟡 Auth (users.sql, sessions.sql)
-
-
-
-
+    ├── 🔴 Payment (transactions.sql, invoices.sql)
+    └── 🟡 Auth (users.sql, sessions.sql)
+```
 
 
 ### What HCC Does Per Branch
@@ -164,15 +161,11 @@ HCC does not replace these filesystems. It mounts on top of them.
 HCC is not a universal improvement. It is a tool for specific workloads.
 
 ---
-
-## Open Question: Type-First or Color-First?
-
-There are two ways to structure the grouping hierarchy. This is not decided yet.
-
 ### Option A: Type-First (Current Default)
 
 Files are grouped by structural type first, then colored by context within each type.
 
+```
 Python/
 ├── 🔵 UI
 ├── 🔴 Payment
@@ -182,8 +175,7 @@ JavaScript/
 ├── 🩶 UI
 ├── 🔴 Payment
 └── 🟡 Auth
-
-
+```
 
 **Pro:** Safe. Dedup and compression happen within structurally similar files.
 **Con:** A UI prefetch needs to know that 🔵 Python and 🩶 JavaScript are related.
@@ -193,6 +185,7 @@ Requires a cross-group association table.
 
 Files are grouped by semantic context first, then split by type.
 
+```
 🔵 UI/
 ├── Python (ui_renderer.py)
 ├── JavaScript (modal.js)
@@ -202,13 +195,11 @@ Files are grouped by semantic context first, then split by type.
 ├── Python (payment.py)
 ├── JavaScript (checkout.js)
 └── SQL (invoices.sql)
-
-
+```
 
 **Pro:** Natural prefetch — open one file, get all related files regardless of type.
 **Con:** Dedup and compression are harder. A `.py` and a `.js` share little structure.
 Cross-type dedup is mostly useless. False positives riskier.
-
 ### Decision
 
 This will be settled by running analysis on real repositories (Linux kernel,
