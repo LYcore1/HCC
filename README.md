@@ -73,7 +73,7 @@ Files in the same branch share patterns. Identical blocks are stored once, refer
 
 | Without HCC | With HCC |
 |---|---|
-| 512 GB SSD stores 512 GB | 512 GB SSD stores 2-5 TB effective |
+| 512 GB SSD stores 512 GB | 512 GB SSD stores 2-5 TB effective(IDK) |
 | Files scattered across disk | Files clustered by meaning |
 | Identical data stored multiple times | Deduplication by color, automatically |
 | No prefetch intelligence | Same-color files loaded together |
