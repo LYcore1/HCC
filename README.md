@@ -101,7 +101,7 @@ No magic. Just structural redundancy exploitation with better grouping.
 
 ## Status
 
-**Pre-alpha. No code yet.** Learning Zig and systems programming.
+**Pre-alpha. No code yet.** Learning Zig and everthing that we need.
 Work begins in earnest after university entrance exams.
 
 ---
