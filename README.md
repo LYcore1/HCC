@@ -278,4 +278,58 @@ contributions, or just a good technical argument.
 
 Either way, thanks for reading.
 
+
+
+
+## Revised Scope
+
+After stepping back and thinking honestly about what I can build alone:
+
+**Storage first. Memory and CPU are off the table until Storage works.**
+
+Even Storage needs to be cut down.
+
+### Three internal milestones (not four phases)
+
+| Milestone | What I actually build |
+|---|---|
+| **M1: Color-Aware Prefetch Only** | FUSE + color tagging (start with manual config files). No dedup. No compression. Just grouping and prefetching. |
+| **M2: Add Adaptive Compression** | Per-branch compression policies. Now I have something to benchmark. |
+| **M3: Add Branch-Scoped Dedup** | BLAKE3 + reference counting. The full Storage vision. |
+
+### Problems I need to solve before writing code
+
+| Problem | My current thinking |
+|---|---|
+| **How does color assignment work?** | Start stupid: a `.hcc-colors.yaml` file where users assign colors by path patterns. Learn heuristics later, or never. Manual might be enough. |
+| **What if color assignment is wrong?** | Lazy re-evaluation on read. Also a `hcc recolor` command to force re-scan. |
+| **How much overhead does FUSE actually add?** | I need real benchmarks on `stat()`-heavy workloads (git status, recursive ls). If it's >30% slower than ext4, I may need a kernel module much sooner than I thought. |
+| **What happens after reboot?** | Store color mappings as extended attributes (xattrs) on the underlying filesystem. No cold start problem. |
+| **How many colors does a monorepo actually need?** | I don't know yet. 10? 100? 1000? This changes everything — hash table size, prefetch strategy, memory footprint. I need to test on real repos before committing to a design. |
+
+### A hard question I asked myself
+
+Before I write a single line of code, I need a concrete answer:
+
+> **What's the expected color count for my target workload?**
+
+If I guess wrong, I'll refactor everything six months in. So I'm going to run experiments on open-source monorepos (Linux kernel, Chromium, Rust compiler) first — no code, just analysis — to get real numbers.
+
+### What this means for the roadmap
+
+Original four-phase plan (Storage → Memory → CPU → Full) is now:
+
 ---
+
+HCC-Storage (M1 → M2 → M3)
+│
+├── If M1 works and is useful → ship it as v0.1
+├── If M2 adds real value → v0.2
+├── If M3 doesn't kill performance → v1.0
+│
+└── Memory and CPU are long-term research interests, not current goals.
+
+
+
+
+I'm alone on this. Ambition needs to meet reality somewhere.
