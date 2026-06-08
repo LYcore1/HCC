@@ -317,19 +317,18 @@ If I guess wrong, I'll refactor everything six months in. So I'm going to run ex
 
 ### What this means for the roadmap
 
-Original four-phase plan (Storage → Memory → CPU → Full) is now:
+The original four-phase plan (Storage → Memory → CPU → Full) is now a single
+track with checkpoints:
 
----
+**M1: Color-Aware Prefetch**
+→ If useful → ship as v0.1
 
-HCC-Storage (M1 → M2 → M3)
-│
-├── If M1 works and is useful → ship it as v0.1
-├── If M2 adds real value → v0.2
-├── If M3 doesn't kill performance → v1.0
-│
-└── Memory and CPU are long-term research interests, not current goals.
+**M2: Adaptive Compression**
+→ If it adds real value → v0.2
 
+**M3: Branch-Scoped Dedup**
+→ If performance holds → v1.0
 
-
+Memory and CPU optimization are long-term research interests, not current goals.
 
 I'm alone on this. Ambition needs to meet reality somewhere.
