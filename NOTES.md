@@ -327,6 +327,14 @@ Maybe in 5 years. Manual + heuristics first.
 
 ---
 
+## Key Critiques (Internalized)
+
+A number of serious technical critiques arrived in June 2026.
+Full details are in [FEEDBACK.md](FEEDBACK.md). Here's what stuck:
+
+- **FUSE might be too slow.** ...
+
+
 *Last updated: June 2026. Everything here is subject to change, deletion, 
 or complete reversal as I learn more. This is thinking out loud, not a 
 commitment.*
